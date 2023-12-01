@@ -55,7 +55,7 @@ import { didYouMean, suggestionList } from "./suggestions";
 import { aggregateError, ERRORS, withModifiedErrorMessage } from "./error";
 
 const validationErrorCode = 'GraphQLValidationFailed';
-const DEFAULT_VALIDATION_ERROR_MESSAGE = 'The schema is not a valid GraphQL schema.';
+const DEFAULT_VALIDATION_ERROR_MESSAGE = 'The schema is not a valid GraphQL schema';
 
 export const ErrGraphQLValidationFailed = (causes: GraphQLError[], message: string = DEFAULT_VALIDATION_ERROR_MESSAGE) =>
   aggregateError(validationErrorCode, message, causes);
@@ -1055,7 +1055,8 @@ export class CoreFeatures {
     const url = this.coreDefinition.extractFeatureUrl(args);
     const existing = this.byIdentity.get(url.identity);
     if (existing) {
-      // TODO: we may want to lossen that limitation at some point. Including the same feature for 2 different major versions should be ok.
+      // TODO: we may want to loosen that limitation at some point. Including
+      // the same feature for 2 different major versions should be ok.
       throw ERRORS.INVALID_LINK_DIRECTIVE_USAGE.err(`Duplicate inclusion of feature ${url.identity}`);
     }
     const imports = extractCoreFeatureImports(url, typedDirective);
@@ -1429,6 +1430,10 @@ export class Schema {
   type(name: string): NamedType | undefined {
     const type = this._types.get(name);
     return type ? type : this._builtInTypes.get(name);
+  }
+
+  inputType(name: string): InputObjectType | undefined {
+    return this.inputTypes().find(t => t.name === name);
   }
 
   typeOfKind<T extends NamedType>(name: string, kind: T['kind']): T | undefined {

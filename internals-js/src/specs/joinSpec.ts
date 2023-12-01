@@ -46,6 +46,9 @@ export type JoinFieldDirectiveArguments = {
   type?: string,
   external?: boolean,
   usedOverridden?: boolean,
+  overrideOptions?: {
+    label: string,
+  }
 }
 
 export class JoinSpecDefinition extends FeatureDefinition {
@@ -124,6 +127,14 @@ export class JoinSpecDefinition extends FeatureDefinition {
       const joinEnumValue = this.addDirective(schema, 'enumValue').addLocations(DirectiveLocation.ENUM_VALUE);
       joinEnumValue.repeatable = true;
       joinEnumValue.addArgument('graph', new NonNullType(graphEnum));
+    }
+
+    // progressive override
+    if (this.version >= (new FeatureVersion(0, 4))) {
+      // add input type for override directive
+      const overrideOptions = this.addInputType(schema, 'OverrideOptions');
+      overrideOptions.addField('label', schema.stringType());
+      joinField.addArgument('overrideOptions', overrideOptions);
     }
 
     if (this.isV01()) {
@@ -227,9 +238,11 @@ export class JoinSpecDefinition extends FeatureDefinition {
 //    for federation 2 in general.
 //  - 0.2: this is the original version released with federation 2.
 //  - 0.3: adds the `isInterfaceObject` argument to `@join__type`, and make the `graph` in `@join__field` skippable.
+//  - 0.4: adds the optional `options` argument to `@override` and the `OverrideOptions` input type.
 export const JOIN_VERSIONS = new FeatureDefinitions<JoinSpecDefinition>(joinIdentity)
   .add(new JoinSpecDefinition(new FeatureVersion(0, 1)))
   .add(new JoinSpecDefinition(new FeatureVersion(0, 2)))
-  .add(new JoinSpecDefinition(new FeatureVersion(0, 3), new FeatureVersion(2, 0)));
+  .add(new JoinSpecDefinition(new FeatureVersion(0, 3), new FeatureVersion(2, 0)))
+  .add(new JoinSpecDefinition(new FeatureVersion(0, 4), new FeatureVersion(2, 7)));
 
 registerKnownFeature(JOIN_VERSIONS);

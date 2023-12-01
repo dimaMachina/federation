@@ -1,6 +1,6 @@
 import { ASTNode, DirectiveLocation, GraphQLError, StringValueNode } from "graphql";
 import { URL } from "url";
-import { CoreFeature, Directive, DirectiveDefinition, EnumType, ErrGraphQLAPISchemaValidationFailed, ErrGraphQLValidationFailed, InputType, ListType, NamedType, NonNullType, ScalarType, Schema, SchemaDefinition, SchemaElement, sourceASTs } from "../definitions";
+import { CoreFeature, Directive, DirectiveDefinition, EnumType, ErrGraphQLAPISchemaValidationFailed, ErrGraphQLValidationFailed, InputObjectType, InputType, ListType, NamedType, NonNullType, ScalarType, Schema, SchemaDefinition, SchemaElement, sourceASTs } from "../definitions";
 import { sameType } from "../types";
 import { assert, findLast, firstOf, MapWithCachedArrays } from '../utils';
 import { aggregateError, ERRORS } from "../error";
@@ -161,6 +161,10 @@ export abstract class FeatureDefinition {
 
   protected addEnumType(schema: Schema, name: string): EnumType {
     return schema.addType(new EnumType(this.typeNameInSchema(schema, name)!));
+  }
+
+  protected addInputType(schema: Schema, name: string): InputObjectType {
+    return schema.addType(new InputObjectType(this.typeNameInSchema(schema, name)!));
   }
 
   protected featureInSchema(schema: Schema): CoreFeature | undefined {
@@ -444,7 +448,7 @@ export class CoreSpecDefinition extends FeatureDefinition {
     //   actually handle this as it does not strongly rely on that "it should be the first" rule, but that
     //   would set a bad example).
     // 2. earlier versions (pre-#1875) were always putting that directive on the definition, and we wanted
-    //   to avoid suprising users by changing that for not reason.
+    //   to avoid surprising users by changing that for no reason.
     //
     // So instead, we put the directive on the schema definition unless some extensions exists but no
     // definition does (that is, no non-extension elements are populated).

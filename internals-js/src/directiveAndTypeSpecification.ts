@@ -4,9 +4,11 @@ import {
   CoreFeature,
   DirectiveDefinition,
   EnumType,
+  InputObjectType,
   InputType,
   isCustomScalarType,
   isEnumType,
+  isInputObjectType,
   isListType,
   isNonNullType,
   isObjectType,
@@ -109,7 +111,7 @@ export function createDirectiveSpecification({
               + `${strategy.name} only supports ${supportedMsg}`
             );
           }
-        };
+        }
         return {
           merge: (argName, values) => {
             const strategy = argStrategies.get(argName);
@@ -237,6 +239,72 @@ export function createObjectTypeSpecification({
           for (const { name: argName, type: argType, defaultValue } of args ?? []) {
             field.addArgument(argName, argType, defaultValue);
           }
+        }
+        return [];
+      }
+    },
+  }
+}
+
+export function createInputObjectTypeSpecification({
+  name,
+  fieldsFct,
+}: {
+  name: string,
+  fieldsFct: (schema: Schema) => FieldSpecification[],
+}): TypeSpecification {
+  return {
+    name,
+    checkOrAdd: (schema: Schema, feature?: CoreFeature, asBuiltIn?: boolean) => {
+      const actualName = feature?.typeNameInSchema(name) ?? name;
+      const expectedFields = fieldsFct(schema);
+      const existing = schema.type(actualName) as InputObjectType | undefined;
+
+      if (existing && !existing.hasFields()) {
+        // This is a hack I think. Input object types in the federation spec is
+        // unprecedented, and introducing them was problematic with our current
+        // approach. As mentioned in the comment here:
+        // (https://github.com/apollographql/federation/blob/92766fd4c3524acb3d3155cd40c5603baf3503ef/internals-js/src/buildSchema.ts#L107-L111),
+        // the shallow/deep creation logic breaks when we have types with
+        // fields.
+        //
+        // This just bypasses the validation that would normally happen in the
+        // `else if` below if the type has only been initialized in the shallow
+        // pass `buildNamedTypeAndDirectivesShallow` but hasn't had its fields
+        // added yet.
+        return [];
+      } else if (existing && existing.hasFields()) {
+        let errors = ensureSameTypeKind('InputObjectType', existing);
+        if (errors.length > 0) {
+          return errors;
+        }
+        assert(isInputObjectType(existing), 'Should be an input object type');
+        for (const { name, type } of expectedFields) {
+          const existingField = existing.field(name);
+          if (!existingField) {
+            errors = errors.concat(ERRORS.TYPE_DEFINITION_INVALID.err(
+              `Invalid definition of input type ${name}: missing field ${name}`,
+              { nodes: existing.sourceAST },
+            ));
+            continue;
+          }
+          let existingType = existingField.type!;
+          if (!isNonNullType(type) && isNonNullType(existingType)) {
+            existingType = existingType.ofType;
+          }
+          if (!sameType(type, existingType)) {
+            errors = errors.concat(ERRORS.TYPE_DEFINITION_INVALID.err(
+              `Invalid definition for field ${name} of type ${name}: should have type ${type} but found type ${existingField.type}`,
+              { nodes: existingField.sourceAST },
+            ));
+          }
+        }
+        return errors;
+      }
+      else {
+        const createdType = schema.addType(new InputObjectType(actualName, asBuiltIn));
+        for (const { name, type } of expectedFields) {
+          createdType.addField(name, type);
         }
         return [];
       }

@@ -17,6 +17,7 @@ import {
   GraphQLAbstractType,
   GraphQLSchema,
   GraphQLInterfaceType,
+  GraphQLInputObjectType,
 } from 'graphql';
 import { PromiseOrValue } from 'graphql/jsutils/PromiseOrValue';
 import { maybeCacheControlFromInfo } from '@apollo/cache-control-types';
@@ -51,6 +52,15 @@ export const AnyType = new GraphQLScalarType({
 export const LinkImportType = new GraphQLScalarType({
   name: 'link__Import',
   specifiedByURL: null
+});
+
+export const OverrideOptions = new GraphQLInputObjectType({
+  name: 'OverrideOptions',
+  fields: {
+    label: {
+      type: GraphQLString,
+    },
+  },
 });
 
 function isPromise<T>(value: PromiseOrValue<T>): value is Promise<T> {
@@ -272,6 +282,7 @@ export const federationTypes: GraphQLNamedType[] = [
   AnyType,
   EntityType,
   LinkImportType,
+  OverrideOptions,
 ];
 
 export function isFederationType(type: GraphQLType): boolean {

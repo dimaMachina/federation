@@ -15,7 +15,7 @@ export function coreFeatureDefinitionIfKnown(url: FeatureUrl): FeatureDefinition
 /**
  * Removes a feature from the set of known features.
  *
- * This exists purely for testing purposes. There is no reason to unregistered features otherwise.
+ * This exists purely for testing purposes. There is no reason to unregister features otherwise.
  */
 export function unregisterKnownFeatures(definitions: FeatureDefinitions) {
   registeredFeatures.delete(definitions.identity);

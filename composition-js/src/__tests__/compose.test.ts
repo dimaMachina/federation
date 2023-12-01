@@ -71,14 +71,14 @@ describe('composition', () => {
     expect(result.supergraphSdl).toMatchString(`
       schema
         @link(url: "https://specs.apollo.dev/link/v1.0")
-        @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+        @link(url: "https://specs.apollo.dev/join/v0.4", for: EXECUTION)
       {
         query: Query
       }
 
       directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
 
-      directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+      directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean, overrideOptions: join__OverrideOptions) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
       directive @join__graph(name: String!, url: String!) on ENUM_VALUE
 
@@ -102,6 +102,10 @@ describe('composition', () => {
       enum join__Graph {
         SUBGRAPH1 @join__graph(name: "Subgraph1", url: "https://Subgraph1")
         SUBGRAPH2 @join__graph(name: "Subgraph2", url: "https://Subgraph2")
+      }
+
+      input join__OverrideOptions {
+        label: String
       }
 
       scalar link__Import
@@ -219,14 +223,14 @@ describe('composition', () => {
     expect(result.supergraphSdl).toMatchString(`
       schema
         @link(url: "https://specs.apollo.dev/link/v1.0")
-        @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+        @link(url: "https://specs.apollo.dev/join/v0.4", for: EXECUTION)
       {
         query: Query
       }
 
       directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
 
-      directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+      directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean, overrideOptions: join__OverrideOptions) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
       directive @join__graph(name: String!, url: String!) on ENUM_VALUE
 
@@ -250,6 +254,10 @@ describe('composition', () => {
       enum join__Graph {
         SUBGRAPH1 @join__graph(name: "Subgraph1", url: "https://Subgraph1")
         SUBGRAPH2 @join__graph(name: "Subgraph2", url: "https://Subgraph2")
+      }
+
+      input join__OverrideOptions {
+        label: String
       }
 
       scalar link__Import

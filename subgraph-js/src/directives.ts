@@ -24,7 +24,7 @@ import {
   GraphQLInputField,
   EnumValueDefinitionNode,
 } from 'graphql';
-import { LinkImportType } from './types';
+import { LinkImportType, OverrideOptions } from './types';
 
 export const KeyDirective = new GraphQLDirective({
   name: 'key',
@@ -135,6 +135,9 @@ export const OverrideDirective = new GraphQLDirective({
     from: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    options: {
+      type: OverrideOptions,
+    }
   },
 });
 

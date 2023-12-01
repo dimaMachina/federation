@@ -146,7 +146,7 @@ export function buildSchemaFromAST(
   // The following is a no-op for "standard" schema, but for federation subgraphs, this is where we handle the auto-addition
   // of imported federation directive definitions. That is why we have avoid looking at directive applications within
   // directive definition earlier: if one of those application was of an imported federation directive, the definition
-  // wouldn't be presence before this point and we'd have triggered an error. After this, we can handle any directive
+  // wouldn't be present before this point and we'd have triggered an error. After this, we can handle any directive
   // application safely.
   errors.push(...schema.blueprint.onDirectiveDefinitionAndSchemaParsed(schema));
 

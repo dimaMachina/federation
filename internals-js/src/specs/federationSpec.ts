@@ -7,6 +7,7 @@ import { FeatureDefinition, FeatureDefinitions, FeatureUrl, FeatureVersion } fro
 import {
   ArgumentSpecification,
   createDirectiveSpecification,
+  createInputObjectTypeSpecification,
   createScalarTypeSpecification,
 } from "../directiveAndTypeSpecification";
 import { DirectiveLocation } from "graphql";
@@ -124,11 +125,31 @@ export class FederationSpecDefinition extends FeatureDefinition {
 
     this.registerSubFeature(INACCESSIBLE_VERSIONS.getMinimumRequiredVersion(version));
 
-    this.registerDirective(createDirectiveSpecification({
-      name: FederationDirectiveName.OVERRIDE,
-      locations: [DirectiveLocation.FIELD_DEFINITION],
-      args: [{ name: 'from', type: (schema) => new NonNullType(schema.stringType()) }],
-    }));
+    if (version >= (new FeatureVersion(2, 7))) {
+      this.registerType(createInputObjectTypeSpecification({
+        name: 'OverrideOptions',
+        fieldsFct: (schema) => [{ name: 'label', type: schema.stringType() }]
+      }));
+      this.registerDirective(createDirectiveSpecification({
+        name: FederationDirectiveName.OVERRIDE,
+        locations: [DirectiveLocation.FIELD_DEFINITION],
+        args: [
+          { name: 'from', type: (schema) => new NonNullType(schema.stringType()) },
+          // TODO: federation__ probably shouldn't be hardcoded here
+          { name: 'options',
+            type: (schema) => {
+              return schema.inputType('federation__OverrideOptions')!;
+            }
+          }
+        ],
+      }));
+    } else {
+      this.registerDirective(createDirectiveSpecification({
+        name: FederationDirectiveName.OVERRIDE,
+        locations: [DirectiveLocation.FIELD_DEFINITION],
+        args: [{ name: 'from', type: (schema) => new NonNullType(schema.stringType()) }],
+      }));
+    }
 
     if (version >= (new FeatureVersion(2, 1))) {
       this.registerDirective(createDirectiveSpecification({
@@ -165,6 +186,7 @@ export const FEDERATION_VERSIONS = new FeatureDefinitions<FederationSpecDefiniti
   .add(new FederationSpecDefinition(new FeatureVersion(2, 3)))
   .add(new FederationSpecDefinition(new FeatureVersion(2, 4)))
   .add(new FederationSpecDefinition(new FeatureVersion(2, 5)))
-  .add(new FederationSpecDefinition(new FeatureVersion(2, 6)));
+  .add(new FederationSpecDefinition(new FeatureVersion(2, 6)))
+  .add(new FederationSpecDefinition(new FeatureVersion(2, 7)));
 
 registerKnownFeature(FEDERATION_VERSIONS);

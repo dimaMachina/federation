@@ -1,4 +1,5 @@
-import { fixtures } from 'apollo-federation-integration-testsuite';
+import { typeDefs as reviewsTypeDefs } from 'apollo-federation-integration-testsuite/src/fixtures/reviews';
+import { typeDefs as accountsTypeDefs } from 'apollo-federation-integration-testsuite/src/fixtures/accounts';
 import { buildSubgraphSchema } from '../buildSubgraphSchema';
 import { printSubgraphSchema } from '../printSubgraphSchema';
 import gql from 'graphql-tag';
@@ -7,7 +8,7 @@ import { FEDERATION2_LINK_WITH_AUTO_EXPANDED_IMPORTS } from '@apollo/federation-
 
 describe('printSubgraphSchema', () => {
   it('prints a subgraph correctly', () => {
-    const schema = buildSubgraphSchema(fixtures[0].typeDefs);
+    const schema = buildSubgraphSchema(accountsTypeDefs);
     expect(printSubgraphSchema(schema)).toMatchString(`
       schema {
         query: RootQuery
@@ -107,7 +108,7 @@ describe('printSubgraphSchema', () => {
   });
 
   it('prints reviews subgraph correctly', () => {
-    const schema = buildSubgraphSchema(fixtures[5].typeDefs);
+    const schema = buildSubgraphSchema(reviewsTypeDefs);
     expect(printSubgraphSchema(schema)).toMatchString(`
       extend schema
         ${FEDERATION2_LINK_WITH_AUTO_EXPANDED_IMPORTS}
